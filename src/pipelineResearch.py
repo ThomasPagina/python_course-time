@@ -33,6 +33,18 @@ class DefectivePipelineStepCopyText(PipelineStep):
         index = random.randint(0, len(text) - 1)
         return text[:index] + '_' + text[index + 1:]
 
+class DefectivePipelineStepRadiactiveCopyText(PipelineStep):
+    def process(self, text: str) -> str:
+        # change half the letters randomly to '_'
+        if not text:
+            return text
+        text_list = list(text)
+        for i in range(len(text_list) // 2):
+            index = random.randint(0, len(text_list) - 1)
+            text_list[index] = '_'
+        return ''.join(text_list)
+        
+
 
 def compare_pipeline_results_length(result:str, result2:str)->int:
     # which one is longer?
@@ -95,5 +107,19 @@ def check_defective_pipeline_step():
 
     run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=make_compare_pipeline_results_count_of_letter('_'))
 
+def check_defective_pipeline_step_radiative():
+    # make two pipelines with different numbers of DefectivePipelineStepRadiactiveCopyText steps
+    steps = [DefectivePipelineStepRadiactiveCopyText()]
+
+    pipeline1 = SeveralRunsPipeline(steps, runs=5)
+    pipeline2 = SeveralRunsPipeline(steps, runs=7)
+
+    # any string for testing
+    input_str1 = "South Africa is a country on the southernmost tip of the African continent."
+    input_str2 = "Angola is a country in Southern Africa. It is bordered by Namibia to the south, Zambia to the east, and the Democratic Republic of the Congo to the north."
+    print(f"Start Pipelines with input: {input_str1} and {input_str2}")
+
+    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=make_compare_pipeline_results_count_of_letter('_'))
+
 if __name__ == "__main__":
-    check_defective_pipeline_step()
+    check_defective_pipeline_step_radiative()
