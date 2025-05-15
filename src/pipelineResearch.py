@@ -15,12 +15,12 @@ def main():
 
     run_and_compare_pipelines(pipeline, pipeline2, input_str)
 
-def run_and_compare_pipelines(pipeline, pipeline2, input_str):
+def run_and_compare_pipelines(pipeline, pipeline2, input_str, comparer=compare_pipeline_results):
     # run the pipelines
     result = pipeline.run_chained(input_str)
     result2 = pipeline2.run_chained(input_str)
 
-    compare_pipeline_results(result, result2)
+    comparer(result, result2)
 
 def compare_pipeline_results(result, result2):
     # which one is longer?
