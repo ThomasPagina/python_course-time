@@ -36,13 +36,24 @@ class DefectivePipelineStepCopyText(PipelineStep):
 
 class DefectivePipelineStepRadiactiveCopyText(PipelineStep):
     def process(self, text: str) -> str:
-        # change half the letters randomly to '_'
+        # Ersetzt zufällig die Hälfte aller noch vorhandenen Buchstaben durch '_'
         if not text:
             return text
-        text_list = list(text)
-        for i in range(len(text_list) // 2):
-            index = random.randint(0, len(text_list) - 1)
-            text_list[index] = '_'
+
+        text_list: List[str] = list(text)
+        # Sammle die Indizes aller Buchstaben, die noch nicht ersetzt wurden
+        letter_indices = [
+            i for i, ch in enumerate(text_list)
+            if ch.isalpha() and ch != '_'
+        ]
+
+        # Wie viele Buchstaben sollen ersetzt werden? (halbe Anzahl)
+        num_to_replace = len(letter_indices) // 2
+
+        # Wähle zufällig genau num_to_replace Indizes aus
+        for idx in random.sample(letter_indices, num_to_replace):
+            text_list[idx] = '_'
+
         return ''.join(text_list)
         
 def remaining_fraction_of_letter(text: str, letter: str = 'e') -> float:
@@ -62,12 +73,20 @@ def estimate_runs_from_fraction(text: str, letter: str = 'e') -> float:
     
     Liefert eine reelle Zahl; für volle Läufe auf- oder abrunden.
     """
-    if not text:
-        return 0.0
-    p = text.count(letter) / len(text)
-    if p >= 1.0:
-        return float('inf')  # unendlich viele Läufe
-    return -math.log2(1.0 - p)
+    L = len(text)
+    if L == 0:
+        raise ValueError("Output must be non-empty.")
+    u = text.count(letter)
+    remaining = L - u
+    if remaining <= 0:
+        raise ValueError(
+            f"No letters remain (all {letter}); infinite or undefined runs."
+        )
+    frac = remaining / L
+
+
+    # N = -log2(frac)
+    return -math.log2(frac)
 
 def compare_pipeline_results_length(result:str, result2:str)->int:
     # which one is longer?
@@ -94,6 +113,11 @@ def make_compare_pipeline_results_remaining_fraction_of_letter(letter='e'):
     def compare(result:str, result2:str)->int:
         return compare_pipeline_results_remaining_fraction_of_letter(result, result2, letter)
     return compare
+def make_compare_pipeline_results_estimate_runs_from_fraction(letter='e'):
+    def compare(result:str, result2:str)->int:
+        return round(estimate_runs_from_fraction(result, letter)) - round(estimate_runs_from_fraction(result2, letter))
+    return compare
+
 def tail_length(result:str, tail_letter='e')->int:
     # how long is the tail? count the number of letters of 'tail_letter' at the end of the string
     return len(result) - len(result.rstrip(tail_letter))
@@ -111,9 +135,9 @@ def run_and_compare_pipelines(pipeline:str, pipeline2:str, input_str1:str, input
     result = comparer(pipelineresult1, pipelineresult2)
 
     if result > 0:
-        print(f"Pipeline 1  took ({result} more runs than Pipeline 2).")
+        print(f"Pipeline 1  took more runs than Pipeline 2.")
     elif result < 0:
-        print(f"Pipeline 2 took ({-result} more runs than Pipeline 1).")
+        print(f"Pipeline 2 took more runs than Pipeline 1.")
     else:
         print(f"Both pipelines run the same time.")
 
@@ -125,7 +149,7 @@ def checkAppender():
     pipeline2 = SeveralRunsPipeline(steps, runs=7)
 
     # any string for testing
-    input_str1 = "South Africa is a country on the southernmost tip of the African continent."
+    input_str1 = "South Africa is a country on the southernmost tip of the African continent. It is known for its diverse culture and history."
     input_str2 = "Angola is a country in Southern Africa. It is bordered by Namibia to the south, Zambia to the east, and the Democratic Republic of the Congo to the north."
     print(f"Start Pipelines with input: {input_str1} and {input_str2}")
 
@@ -135,29 +159,29 @@ def check_defective_pipeline_step():
     # make two pipelines with different numbers of DefectivePipelineStepCopyText steps
     steps = [DefectivePipelineStepCopyText()]
 
-    pipeline1 = SeveralRunsPipeline(steps, runs=5)
-    pipeline2 = SeveralRunsPipeline(steps, runs=7)
+    pipeline1 = SeveralRunsPipeline(steps, runs=2)
+    pipeline2 = SeveralRunsPipeline(steps, runs=3)
 
     # any string for testing
     input_str1 = "South Africa is a country on the southernmost tip of the African continent."
     input_str2 = "Angola is a country in Southern Africa. It is bordered by Namibia to the south, Zambia to the east, and the Democratic Republic of the Congo to the north."
     print(f"Start Pipelines with input: {input_str1} and {input_str2}")
 
-    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=make_compare_pipeline_results_remaining_fraction_of_letter('_'))
+    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=make_compare_pipeline_results_count_of_letter('_'))
 
 def check_defective_pipeline_step_radiative():
     # make two pipelines with different numbers of DefectivePipelineStepRadiactiveCopyText steps
     steps = [DefectivePipelineStepRadiactiveCopyText()]
 
-    pipeline1 = SeveralRunsPipeline(steps, runs=5)
-    pipeline2 = SeveralRunsPipeline(steps, runs=7)
+    pipeline1 = SeveralRunsPipeline(steps, runs=3)
+    pipeline2 = SeveralRunsPipeline(steps, runs=1)
 
     # any string for testing
-    input_str1 = "South Africa is a country on the southernmost tip of the African continent."
-    input_str2 = "Angola is a country in Southern Africa. It is bordered by Namibia to the south, Zambia to the east, and the Democratic Republic of the Congo to the north."
+    input_str1 = "South Africa is a country on the southernmost tip of the African continent. It is known for its diverse culture and history. There are many languages spoken in South Africa, including Zulu, Xhosa, Afrikaans, and English."
+    input_str2 = "Angola is a country in Southern Africa. It is bordered by Namibia to the south, Zambia to the east, and the Democratic Republic of the Congo to the north. Among the animals of this country are elephants, lions, and leopards. The capital city is Luanda."
     print(f"Start Pipelines with input: {input_str1} and {input_str2}")
 
-    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=make_compare_pipeline_results_percentage_of_letter('_'))
+    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=make_compare_pipeline_results_estimate_runs_from_fraction('_'))
 
 if __name__ == "__main__":
     check_defective_pipeline_step_radiative()
