@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from pipeline9 import MakeAppender, Pipeline
+from pipeline9 import MakeAppender, Pipeline, PipelineStep
 
 class SeveralRunsPipeline(Pipeline):
     def __init__(self, steps, runs=1):
@@ -22,7 +22,11 @@ class SeveralRunsPipeline(Pipeline):
                 s = step.process(s)
                 print(s)
         return s
-
+    
+class DefectivePipelineStepCopyText(PipelineStep):
+    def process(self, text: str) -> str:
+        # Simulate a defect by copying the text without modification
+        return text
 
 def main():
     # make two pipelines with different numbers of MakeAppender steps
