@@ -2,12 +2,34 @@
 
 from pipeline9 import MakeAppender, Pipeline
 
+class SeveralRunsPipeline(Pipeline):
+    def __init__(self, steps, runs=1):
+        super().__init__(steps)
+        self.original_steps = steps.copy()
+        self.steps = steps.copy()
+        self.runs = runs
+
+    def run_chained(self, s: str) -> str:
+        current = s
+        for _ in range(self.runs):
+            for step in self.steps:
+                current = step.process(current)
+                print(current)
+        return current
+    def run_independent(self, s):
+        for _ in range(self.runs):
+            for step in self.steps:
+                s = step.process(s)
+                print(s)
+        return s
+
+
 def main():
     # make two pipelines with different numbers of MakeAppender steps
-    steps = [MakeAppender('e') for _ in range(5)]
-    steps2 = [MakeAppender('e') for _ in range(7)]
-    pipeline = Pipeline(steps)
-    pipeline2 = Pipeline(steps2)
+    steps = [MakeAppender('e')]
+    steps2 = [MakeAppender('e')]
+    pipeline = SeveralRunsPipeline(steps, runs=5)
+    pipeline2 = SeveralRunsPipeline(steps2, runs=7)
 
     # any string for testing
     input_str = "BDR"
