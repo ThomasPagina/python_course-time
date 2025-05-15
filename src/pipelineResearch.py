@@ -57,11 +57,11 @@ def run_and_compare_pipelines(pipeline:str, pipeline2:str, input_str1:str, input
     result = comparer(pipelineresult1, pipelineresult2)
 
     if result > 0:
-        print(f"Pipeline 1 ({len(pipelineresult1)} chars) is longer than Pipeline 2 ({len(pipelineresult2)} chars).")
+        print(f"The tail of Pipeline 1  is longer than the tail of Pipeline 2 ({result} runs).")
     elif result < 0:
-        print(f"Pipeline 2 ({len(pipelineresult2)} chars) is longer than Pipeline 1 ({len(pipelineresult1)} chars).")
+        print(f"The tail of Pipeline 2 is longer than the tail of Pipeline 1 ({-result} runs).")
     else:
-        print(f"Both pipelines produced results of equal length: {len(pipelineresult1)} chars.")
+        print(f"Both pipelines produced results of equal length.")
 
 
 
