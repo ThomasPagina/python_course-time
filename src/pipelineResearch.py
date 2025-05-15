@@ -37,6 +37,13 @@ class DefectivePipelineStepCopyText(PipelineStep):
 def compare_pipeline_results_length(result:str, result2:str)->int:
     # which one is longer?
     return len(result) - len(result2)
+def compare_pipeline_results_count_of_letter(result:str, result2:str, letter='e')->int:
+    # which one has more of the letter 'e'?
+    return result.count(letter) - result2.count(letter)
+def make_compare_pipeline_results_count_of_letter(letter='e'):
+    def compare(result:str, result2:str)->int:
+        return compare_pipeline_results_count_of_letter(result, result2, letter)
+    return compare
 def tail_length(result:str, tail_letter='e')->int:
     # how long is the tail? count the number of letters of 'tail_letter' at the end of the string
     return len(result) - len(result.rstrip(tail_letter))
@@ -72,7 +79,7 @@ def checkAppender():
     input_str2 = "Angola is a country in Southern Africa. It is bordered by Namibia to the south, Zambia to the east, and the Democratic Republic of the Congo to the north."
     print(f"Start Pipelines with input: {input_str1} and {input_str2}")
 
-    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=compare_pipeline_results_tail_length)
+    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=compare_pipeline_results_count_of_letter('_'))
     
 def check_defective_pipeline_step():
     # make two pipelines with different numbers of DefectivePipelineStepCopyText steps
@@ -86,7 +93,7 @@ def check_defective_pipeline_step():
     input_str2 = "Angola is a country in Southern Africa. It is bordered by Namibia to the south, Zambia to the east, and the Democratic Republic of the Congo to the north."
     print(f"Start Pipelines with input: {input_str1} and {input_str2}")
 
-    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=compare_pipeline_results_length)
+    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=make_compare_pipeline_results_count_of_letter('_'))
 
 if __name__ == "__main__":
     check_defective_pipeline_step()
