@@ -33,14 +33,14 @@ def main():
 
     # any string for testing
     input_str = "BDR"
-    print(f"Starte Pipelines mit Eingabe: {input_str}")
+    print(f"Start Pipelines with input: {input_str}")
 
-    run_and_compare_pipelinelengths(pipeline1, pipeline2, input_str)
-def compare_pipeline_results(result:str, result2:str)->int:
+    run_and_compare_pipelines(pipeline1, pipeline2, input_str)
+def compare_pipeline_results_length(result:str, result2:str)->int:
     # which one is longer?
     return len(result) - len(result2)
 
-def run_and_compare_pipelinelengths(pipeline:str, pipeline2:str, input_str:str, comparer=compare_pipeline_results):
+def run_and_compare_pipelines(pipeline:str, pipeline2:str, input_str:str, comparer=compare_pipeline_results_length):
     # run the pipelines
     pipelineresult1 = pipeline.run_chained(input_str)
     pipelineresult2 = pipeline2.run_chained(input_str)
