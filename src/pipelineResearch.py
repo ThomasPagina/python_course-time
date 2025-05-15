@@ -3,6 +3,7 @@
 from pipeline9 import MakeAppender, Pipeline, PipelineStep
 import random
 from typing import List 
+import math
 
 class SeveralRunsPipeline(Pipeline):
     def __init__(self, steps: List[PipelineStep], runs: int = 1):
@@ -44,7 +45,29 @@ class DefectivePipelineStepRadiactiveCopyText(PipelineStep):
             text_list[index] = '_'
         return ''.join(text_list)
         
+def remaining_fraction_of_letter(text: str, letter: str = 'e') -> float:
+    """
+    returns the fraction of the text that is not the letter 'e'.
+    """
+    if not text:
+        return 0.0
+    p = text.count(letter) / len(text)
+    return 1.0 - p
 
+def estimate_runs_from_fraction(text: str, letter: str = 'e') -> float:
+    """
+    Schätzt, wie viele 'Runs' nötig gewesen wären, um 
+    auf den aktuellen Anteil des Buchstabens zu kommen,
+    unter der Annahme, dass jeden Run der Restanteil halbiert wird.
+    
+    Liefert eine reelle Zahl; für volle Läufe auf- oder abrunden.
+    """
+    if not text:
+        return 0.0
+    p = text.count(letter) / len(text)
+    if p >= 1.0:
+        return float('inf')  # unendlich viele Läufe
+    return -math.log2(1.0 - p)
 
 def compare_pipeline_results_length(result:str, result2:str)->int:
     # which one is longer?
@@ -52,9 +75,24 @@ def compare_pipeline_results_length(result:str, result2:str)->int:
 def compare_pipeline_results_count_of_letter(result:str, result2:str, letter='e')->int:
     # which one has more of the letter 'e'?
     return result.count(letter) - result2.count(letter)
+def compare_pipeline_results_percentage_of_letter(result:str, result2:str, letter='e')->int:
+    # which one has a higher percentage of the letter 'e'?
+    return result.count(letter) / len(result) - result2.count(letter) / len(result2)
+def compare_pipeline_results_remaining_fraction_of_letter(result:str, result2:str, letter='e')->int:
+    # which one has a higher remaining fraction of the letter 'e'?
+    return remaining_fraction_of_letter(result, letter) - remaining_fraction_of_letter(result2, letter)
+
 def make_compare_pipeline_results_count_of_letter(letter='e'):
     def compare(result:str, result2:str)->int:
         return compare_pipeline_results_count_of_letter(result, result2, letter)
+    return compare
+def make_compare_pipeline_results_percentage_of_letter(letter='e'):
+    def compare(result:str, result2:str)->int:
+        return compare_pipeline_results_percentage_of_letter(result, result2, letter)
+    return compare
+def make_compare_pipeline_results_remaining_fraction_of_letter(letter='e'):
+    def compare(result:str, result2:str)->int:
+        return compare_pipeline_results_remaining_fraction_of_letter(result, result2, letter)
     return compare
 def tail_length(result:str, tail_letter='e')->int:
     # how long is the tail? count the number of letters of 'tail_letter' at the end of the string
@@ -105,7 +143,7 @@ def check_defective_pipeline_step():
     input_str2 = "Angola is a country in Southern Africa. It is bordered by Namibia to the south, Zambia to the east, and the Democratic Republic of the Congo to the north."
     print(f"Start Pipelines with input: {input_str1} and {input_str2}")
 
-    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=make_compare_pipeline_results_count_of_letter('_'))
+    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=make_compare_pipeline_results_remaining_fraction_of_letter('_'))
 
 def check_defective_pipeline_step_radiative():
     # make two pipelines with different numbers of DefectivePipelineStepRadiactiveCopyText steps
@@ -119,7 +157,7 @@ def check_defective_pipeline_step_radiative():
     input_str2 = "Angola is a country in Southern Africa. It is bordered by Namibia to the south, Zambia to the east, and the Democratic Republic of the Congo to the north."
     print(f"Start Pipelines with input: {input_str1} and {input_str2}")
 
-    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=make_compare_pipeline_results_count_of_letter('_'))
+    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=make_compare_pipeline_results_percentage_of_letter('_'))
 
 if __name__ == "__main__":
     check_defective_pipeline_step_radiative()
