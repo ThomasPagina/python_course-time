@@ -39,8 +39,16 @@ def main():
 def compare_pipeline_results_length(result:str, result2:str)->int:
     # which one is longer?
     return len(result) - len(result2)
+def tail_length(result:str, tail_letter='e')->int:
+    # how long is the tail? count the number of letters of 'tail_letter' at the end of the string
+    return len(result) - len(result.rstrip(tail_letter))
 
-def run_and_compare_pipelines(pipeline:str, pipeline2:str, input_str:str, comparer=compare_pipeline_results_length):
+def compare_pipeline_results_tail_length(result:str, result2:str,tail_letter='e')->int:
+    # which one has the longer tail?
+    return tail_length(result, tail_letter) - tail_length(result2, tail_letter)
+
+
+def run_and_compare_pipelines(pipeline:str, pipeline2:str, input_str:str, comparer=compare_pipeline_results_tail_length):
     # run the pipelines
     pipelineresult1 = pipeline.run_chained(input_str)
     pipelineresult2 = pipeline2.run_chained(input_str)
