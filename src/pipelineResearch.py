@@ -33,7 +33,20 @@ class DefectivePipelineStepCopyText(PipelineStep):
         index = random.randint(0, len(text) - 1)
         return text[:index] + '_' + text[index + 1:]
 
-def main():
+def checkAppender():
+    # make two pipelines with different numbers of MakeAppender steps
+    steps = [MakeAppender('e')]
+
+    pipeline1 = SeveralRunsPipeline(steps, runs=5)
+    pipeline2 = SeveralRunsPipeline(steps, runs=7)
+
+    # any string for testing
+    input_str1 = "South Africa is a country on the southernmost tip of the African continent."
+    input_str2 = "Angola is a country in Southern Africa. It is bordered by Namibia to the south, Zambia to the east, and the Democratic Republic of the Congo to the north."
+    print(f"Start Pipelines with input: {input_str1} and {input_str2}")
+
+    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=compare_pipeline_results_tail_length)
+def check_defective_pipeline_step():
     # make two pipelines with different numbers of DefectivePipelineStepCopyText steps
     steps = [DefectivePipelineStepCopyText()]
 
@@ -45,7 +58,7 @@ def main():
     input_str2 = "Angola is a country in Southern Africa. It is bordered by Namibia to the south, Zambia to the east, and the Democratic Republic of the Congo to the north."
     print(f"Start Pipelines with input: {input_str1} and {input_str2}")
 
-    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=compare_pipeline_results_tail_length)
+    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=compare_pipeline_results_length)
 def compare_pipeline_results_length(result:str, result2:str)->int:
     # which one is longer?
     return len(result) - len(result2)
@@ -75,4 +88,4 @@ def run_and_compare_pipelines(pipeline:str, pipeline2:str, input_str1:str, input
 
 
 if __name__ == "__main__":
-    main()
+    check_defective_pipeline_step()
