@@ -22,8 +22,8 @@ def compare_pipeline_results(result, result2):
         print(f"Pipeline 2 (7 Appender) Ergebnis: {result2} ist länger als Pipeline 1 (5 Appender) Ergebnis: {result}")
     else:
         print(f"Beide Ergebnisse sind gleich lang: {len(result)} Zeichen.")
-        
-def run_and_compare_pipelines(pipeline, pipeline2, input_str, comparer=compare_pipeline_results):
+
+def run_and_compare_pipelines(pipeline:str, pipeline2:str, input_str:str, comparer=compare_pipeline_results):
     # run the pipelines
     result = pipeline.run_chained(input_str)
     result2 = pipeline2.run_chained(input_str)
