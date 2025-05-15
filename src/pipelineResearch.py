@@ -32,8 +32,8 @@ def main():
     pipeline2 = SeveralRunsPipeline(steps, runs=7)
 
     # any string for testing
-    input_str1 = "BDR"
-    input_str2 = "DDR"
+    input_str1 = "South Africa"
+    input_str2 = "Angola"
     print(f"Start Pipelines with input: {input_str1} and {input_str2}")
 
     run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=compare_pipeline_results_tail_length)
