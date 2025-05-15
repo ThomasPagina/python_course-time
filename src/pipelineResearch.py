@@ -14,25 +14,33 @@ def main():
     print(f"Starte Pipelines mit Eingabe: {input_str}")
 
     run_and_compare_pipelines(pipeline, pipeline2, input_str)
-def compare_pipeline_results(result, result2):
+def compare_pipeline_results(result:str, result2:str)->int:
     # which one is longer?
     if len(result) > len(result2):
         print(f"Pipeline 1 (5 Appender) Ergebnis: {result} ist länger als Pipeline 2 (7 Appender) Ergebnis: {result2}")
+        return 1
     elif len(result) < len(result2):
         print(f"Pipeline 2 (7 Appender) Ergebnis: {result2} ist länger als Pipeline 1 (5 Appender) Ergebnis: {result}")
+        return -1
     else:
         print(f"Beide Ergebnisse sind gleich lang: {len(result)} Zeichen.")
+        return 0
 
 def run_and_compare_pipelines(pipeline:str, pipeline2:str, input_str:str, comparer=compare_pipeline_results):
     # run the pipelines
-    result = pipeline.run_chained(input_str)
-    result2 = pipeline2.run_chained(input_str)
+    pipelineresult1 = pipeline.run_chained(input_str)
+    pipelineresult2 = pipeline2.run_chained(input_str)
 
-    comparer(result, result2)
+    result = comparer(pipelineresult1, pipelineresult2)
+
+    if result == 1:
+        print(f"Pipeline 1 (5 Appender) ist länger als Pipeline 2 (7 Appender)")
+    elif result == -1:
+        print(f"Pipeline 2 (7 Appender) ist länger als Pipeline 1 (5 Appender)")
+    else:
+        print(f"Beide Ergebnisse sind gleich lang")
 
 
-
-    
 
 if __name__ == "__main__":
     main()
