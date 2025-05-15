@@ -27,15 +27,15 @@ class SeveralRunsPipeline(Pipeline):
 def main():
     # make two pipelines with different numbers of MakeAppender steps
     steps = [MakeAppender('e')]
-    steps2 = [MakeAppender('e')]
-    pipeline = SeveralRunsPipeline(steps, runs=5)
-    pipeline2 = SeveralRunsPipeline(steps2, runs=7)
+  
+    pipeline1 = SeveralRunsPipeline(steps, runs=5)
+    pipeline2 = SeveralRunsPipeline(steps, runs=7)
 
     # any string for testing
     input_str = "BDR"
     print(f"Starte Pipelines mit Eingabe: {input_str}")
 
-    run_and_compare_pipelinelengths(pipeline, pipeline2, input_str)
+    run_and_compare_pipelinelengths(pipeline1, pipeline2, input_str)
 def compare_pipeline_results(result:str, result2:str)->int:
     # which one is longer?
     return len(result) - len(result2)
