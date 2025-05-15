@@ -61,11 +61,11 @@ def run_and_compare_pipelines(pipeline:str, pipeline2:str, input_str1:str, input
     result = comparer(pipelineresult1, pipelineresult2)
 
     if result > 0:
-        print(f"The tail of Pipeline 1  is longer than the tail of Pipeline 2 ({result} runs).")
+        print(f"Pipeline 1  took ({result} more runs than Pipeline 2).")
     elif result < 0:
-        print(f"The tail of Pipeline 2 is longer than the tail of Pipeline 1 ({-result} runs).")
+        print(f"Pipeline 2 took ({-result} more runs than Pipeline 1).")
     else:
-        print(f"Both pipelines produced results of equal length.")
+        print(f"Both pipelines run the same time.")
 
 def checkAppender():
     # make two pipelines with different numbers of MakeAppender steps
