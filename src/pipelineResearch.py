@@ -32,10 +32,11 @@ def main():
     pipeline2 = SeveralRunsPipeline(steps, runs=7)
 
     # any string for testing
-    input_str = "BDR"
-    print(f"Start Pipelines with input: {input_str}")
+    input_str1 = "BDR"
+    input_str2 = "DDR"
+    print(f"Start Pipelines with input: {input_str1} and {input_str2}")
 
-    run_and_compare_pipelines(pipeline1, pipeline2, input_str)
+    run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=compare_pipeline_results_tail_length)
 def compare_pipeline_results_length(result:str, result2:str)->int:
     # which one is longer?
     return len(result) - len(result2)
@@ -48,10 +49,10 @@ def compare_pipeline_results_tail_length(result:str, result2:str,tail_letter='e'
     return tail_length(result, tail_letter) - tail_length(result2, tail_letter)
 
 
-def run_and_compare_pipelines(pipeline:str, pipeline2:str, input_str:str, comparer=compare_pipeline_results_tail_length):
+def run_and_compare_pipelines(pipeline:str, pipeline2:str, input_str1:str, input_str2:str, comparer=compare_pipeline_results_tail_length):
     # run the pipelines
-    pipelineresult1 = pipeline.run_chained(input_str)
-    pipelineresult2 = pipeline2.run_chained(input_str)
+    pipelineresult1 = pipeline.run_chained(input_str1)
+    pipelineresult2 = pipeline2.run_chained(input_str2)
 
     result = comparer(pipelineresult1, pipelineresult2)
 
