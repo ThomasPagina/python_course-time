@@ -39,6 +39,30 @@ def simulate_generations(
 
     return variances, saved_samples
 
+def plot_variance_over_generations(variances: list, ax: plt.Axes) -> None:
+    """Zeichnet den Verlauf der Varianz über die Generationen."""
+    ax.plot(variances, marker='o')
+    ax.set_title('Varianz über Generationen')
+    ax.set_xlabel('Generation')
+    ax.set_ylabel('Varianz')
+    ax.grid(True)
+
+def plot_sample_scatter(samples: np.ndarray, ax: plt.Axes, title: str) -> None:
+    """Zeichnet einen Scatter-Plot der Stichproben."""
+    ax.scatter(samples[:, 0], samples[:, 1], alpha=0.5)
+    ax.set_title(title)
+    ax.set_xlabel('X1')
+    ax.set_ylabel('X2')
+    ax.grid(True)
+
+def getTitles_from_sample_indices(sample_indices: Tuple[int, int, int]) -> Dict[int, str]:
+    """Erzeugt Titel für die Scatter-Plots aus den Stichproben-Indizes."""
+    return {
+        sample_indices[0]: f'Ausgangssample (Generation {sample_indices[0]})',
+        sample_indices[1]: f'Mittleres Sample (Generation {sample_indices[1]})',
+        sample_indices[2]: f'Endsample (Generation {sample_indices[2]})'
+    }
+
 def plot_results(
     variances: list,
     saved_samples: Dict[int, np.ndarray],
@@ -47,19 +71,16 @@ def plot_results(
     """Erstellt ein 2x2-Plot mit Varianzverlauf und ausgewählten Stichproben."""
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
 
-    # Varianzverlauf
-    axes[0, 0].plot(variances, marker='o')
-    axes[0, 0].set_title('Varianz über Generationen')
-    axes[0, 0].set_xlabel('Generation')
-    axes[0, 0].set_ylabel('Varianz')
-    axes[0, 0].grid(True)
+    # variances in the first subplot
+    plot_variance_over_generations(variances, ax=axes[0, 0])
+    # scatter plots in the other subplots
+    scatter_samples_with_titles(saved_samples, sample_indices_to_save, axes)
 
-    # Scatter-Plots der gespeicherten Stichproben
-    titles = {
-        sample_indices_to_save[0]: f'Ausgangssample (Generation {sample_indices_to_save[0]})',
-        sample_indices_to_save[1]: f'Mittleres Sample (Generation {sample_indices_to_save[1]})',
-        sample_indices_to_save[2]: f'Endsample (Generation {sample_indices_to_save[2]})'
-    }
+    plt.tight_layout()
+    plt.show()
+
+def scatter_samples_with_titles(saved_samples, sample_indices_to_save, axes):
+    titles = getTitles_from_sample_indices(sample_indices_to_save)
 
     positions = [(0, 1), (1, 0), (1, 1)]
 
@@ -67,21 +88,13 @@ def plot_results(
         row, col = positions[idx]
         sample = saved_samples.get(gen)
         if sample is not None:
-            axes[row, col].scatter(sample[:, 0], sample[:, 1], alpha=0.5)
-            axes[row, col].set_title(titles[gen])
-            axes[row, col].set_xlabel('X1')
-            axes[row, col].set_ylabel('X2')
-            axes[row, col].grid(True)
+            plot_sample_scatter(sample, ax=axes[row, col], title=titles[gen])
 
-    plt.tight_layout()
-    plt.show()
-
-def main():
+def simulate( n_samples:int, n_generations:int) -> Tuple[list, Dict[int, np.ndarray]]: 
     """Hauptfunktion zur Ausführung der Simulation und Visualisierung."""
-    dim = 2
-    n_samples = 1000
-    n_generations = 50
+    
     sample_indices_to_save = (0, n_generations // 2, n_generations - 1)
+    dim=2
 
     variances, saved_samples = simulate_generations(
         dim, n_samples, n_generations, sample_indices_to_save
@@ -89,5 +102,10 @@ def main():
     plot_results(variances, saved_samples, sample_indices_to_save)
 
 if __name__ == "__main__":
-    main()
+    simulate(
+       
+        n_samples=1000, 
+        n_generations=100 
+        
+    )
 
