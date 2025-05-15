@@ -13,11 +13,14 @@ def main():
     input_str = "BDR"
     print(f"Starte Pipelines mit Eingabe: {input_str}")
 
+    run_and_compare_pipelines(pipeline, pipeline2, input_str)
+
+def run_and_compare_pipelines(pipeline, pipeline2, input_str):
     # run the pipelines
     result = pipeline.run_chained(input_str)
     result2 = pipeline2.run_chained(input_str)
 
-    #which one is longer?
+    # which one is longer?
     if len(result) > len(result2):
         print(f"Pipeline 1 (5 Appender) Ergebnis: {result} ist länger als Pipeline 2 (7 Appender) Ergebnis: {result2}")
     elif len(result) < len(result2):
