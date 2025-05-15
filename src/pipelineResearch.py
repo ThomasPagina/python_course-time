@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 from pipeline9 import MakeAppender, Pipeline, PipelineStep
+import random
+from typing import List 
 
 class SeveralRunsPipeline(Pipeline):
-    def __init__(self, steps, runs=1):
+    def __init__(self, steps: List[PipelineStep], runs: int = 1):
         super().__init__(steps)
         self.original_steps = steps.copy()
         self.steps = steps.copy()
@@ -25,19 +27,22 @@ class SeveralRunsPipeline(Pipeline):
     
 class DefectivePipelineStepCopyText(PipelineStep):
     def process(self, text: str) -> str:
-        # Simulate a defect by copying the text without modification
-        return text
+        # change any random letter to '_'
+        if not text:
+            return text
+        index = random.randint(0, len(text) - 1)
+        return text[:index] + '_' + text[index + 1:]
 
 def main():
-    # make two pipelines with different numbers of MakeAppender steps
-    steps = [MakeAppender('e')]
-  
+    # make two pipelines with different numbers of DefectivePipelineStepCopyText steps
+    steps = [DefectivePipelineStepCopyText()]
+
     pipeline1 = SeveralRunsPipeline(steps, runs=5)
     pipeline2 = SeveralRunsPipeline(steps, runs=7)
 
     # any string for testing
-    input_str1 = "South Africa"
-    input_str2 = "Angola"
+    input_str1 = "South Africa is a country on the southernmost tip of the African continent."
+    input_str2 = "Angola is a country in Southern Africa. It is bordered by Namibia to the south, Zambia to the east, and the Democratic Republic of the Congo to the north."
     print(f"Start Pipelines with input: {input_str1} and {input_str2}")
 
     run_and_compare_pipelines(pipeline1, pipeline2, input_str1, input_str2, comparer=compare_pipeline_results_tail_length)
