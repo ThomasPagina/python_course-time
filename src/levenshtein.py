@@ -111,26 +111,15 @@ def build_and_run(source: str, target: str):
 
             # Operation ausführen
             if action == 'substitute':
-                step = Swap(arg)
-                steps.append(step)
-                current = step.process(current)
+                current = apply_swap_operation(Swap, current, steps, arg)
             else:
-                step = Delete()
-                steps.append(step)
-                current = step.process(current)
+                current = apply_delete_operation(Delete, current, steps)
 
             # Rückrotation
-            back = (len(current) - t) % len(current) if current else 0
-            current = apply_moves(back, Move, steps, current)
+            current = apply_reverse_moves(Move, current, steps, t)
 
         elif action == 'insert':
-            t = idx % (len(current) + 1)
-            current = apply_moves(t, Move, steps, current)
-            step = Add(arg)
-            steps.append(step)
-            current = step.process(current)
-            back = (len(current) - t) % len(current)
-            current = apply_moves(back, Move, steps, current)
+            current = insert_and_rotate(Add, Move, current, steps, arg, idx)
 
     # Fallback finale Rotation
     if current != target:
@@ -146,6 +135,32 @@ def build_and_run(source: str, target: str):
     print("Transformation erfolgreich:", result)
     graph = pipeline.visualize("levenshtein_pipeline", format='png')
     graph.view()
+
+def apply_delete_operation(Delete, current, steps):
+    step = Delete()
+    steps.append(step)
+    current = step.process(current)
+    return current
+
+def apply_swap_operation(Swap, current, steps, arg):
+    step = Swap(arg)
+    steps.append(step)
+    current = step.process(current)
+    return current
+
+def insert_and_rotate(Add, Move, current, steps, arg, idx):
+    t = idx % (len(current) + 1)
+    current = apply_moves(t, Move, steps, current)
+    step = Add(arg)
+    steps.append(step)
+    current = step.process(current)
+    current = apply_reverse_moves(Move, current, steps, t)
+    return current
+
+def apply_reverse_moves(Move, current, steps, t):
+    back = (len(current) - t) % len(current) if current else 0
+    current = apply_moves(back, Move, steps, current)
+    return current
 
 if __name__ == "__main__":
     # Test-Fälle
