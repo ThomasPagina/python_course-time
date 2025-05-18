@@ -1,6 +1,16 @@
 import pipeline9
 from pipeline9 import PipelineStep, Pipeline
 
+# Helfer-Funktion, um Move-Schritte mehrfach anzuwenden
+
+def apply_moves(count: int, Move, steps: list, current: str) -> str:
+    """Fügt count Mal einen Move-Schritt hinzu und rotiert current entsprechend."""
+    for _ in range(count):
+        step = Move()
+        steps.append(step)
+        current = step.process(current)
+    return current
+
 # Neue Pipeline-Schritte definieren
 def define_pipeline_steps():
     class Add(PipelineStep):
@@ -66,7 +76,6 @@ def levenshtein_path(source: str, target: str):
                 op_choice = ('insert', target[j-1])
             op[i][j] = op_choice
 
-    # Rückverfolgung
     i, j, ops = m, n, []
     while i > 0 or j > 0:
         action, arg = op[i][j]
@@ -85,7 +94,7 @@ def levenshtein_path(source: str, target: str):
     ops.reverse()
     return dp[m][n], ops
 
-# Demo: Baue Pipeline-Schritte mit Rotation und teste
+# Demo: Baue Pipeline mit Rotation und teste
 def build_and_run(source: str, target: str):
     Add, Delete, Swap, Move = define_pipeline_steps()
     distance, ops = levenshtein_path(source, target)
@@ -95,45 +104,38 @@ def build_and_run(source: str, target: str):
     current = source
     steps = []
     for action, arg, idx in ops:
-        # Allgemeine Vorrotation
         if action in ('substitute', 'delete'):
-            L = len(current)
-            t = (idx + 1) % L
-            for _ in range(t):
-                steps.append(Move()); current = Move().process(current)
+            # Vorrotation zum Ende der Zielposition
+            t = (idx + 1) % len(current)
+            current = apply_moves(t, Move, steps, current)
 
             # Operation ausführen
             if action == 'substitute':
-                steps.append(Swap(arg)); current = Swap(arg).process(current)
-            else:  # delete
-                L_before = len(current)
-                steps.append(Delete()); current = Delete().process(current)
+                step = Swap(arg)
+                steps.append(step)
+                current = step.process(current)
+            else:
+                step = Delete()
+                steps.append(step)
+                current = step.process(current)
 
-            # Back-Rotation
-            L_new = len(current)
-            back = (L_new - t) % L_new if L_new > 0 else 0
-            for _ in range(back):
-                steps.append(Move()); current = Move().process(current)
+            # Rückrotation
+            back = (len(current) - t) % len(current) if current else 0
+            current = apply_moves(back, Move, steps, current)
 
         elif action == 'insert':
-            L = len(current)
-            t = idx % (L + 1)
-            for _ in range(t):
-                steps.append(Move()); current = Move().process(current)
-            steps.append(Add(arg)); current = Add(arg).process(current)
+            t = idx % (len(current) + 1)
+            current = apply_moves(t, Move, steps, current)
+            step = Add(arg)
+            steps.append(step)
+            current = step.process(current)
+            back = (len(current) - t) % len(current)
+            current = apply_moves(back, Move, steps, current)
 
-            # Back-Rotation nach Einfügung
-            L_new = len(current)
-            back = (L_new - t) % L_new
-            for _ in range(back):
-                steps.append(Move()); current = Move().process(current)
-
-    # Fallback: finale Korrekturrotation
+    # Fallback finale Rotation
     if current != target:
-        L = len(current)
-        for _ in range(L):
-            steps.append(Move())
-            current = Move().process(current)
+        for _ in range(len(current)):
+            current = apply_moves(1, Move, steps, current)
             if current == target:
                 break
 
@@ -142,20 +144,16 @@ def build_and_run(source: str, target: str):
     result = pipeline.run_chained(source)
     assert result == target, f"Erwartet '{target}', erhalten '{result}'"
     print("Transformation erfolgreich:", result)
-    # Graph ausgeben
     graph = pipeline.visualize("levenshtein_pipeline", format='png')
     graph.view()
 
 if __name__ == "__main__":
     # Test-Fälle
-    for src, tgt in [("Haus", "Maus"), ("Haustier", "Mausstier"), ("Haustierl", "Mausstier"),("Katzenfutter","Hundemutter")]:
+    for src, tgt in [("Haus", "Maus"),
+                     ("Haustier", "Mausstier"),
+                     ("Haustierl", "Mausstier"),
+                     ("Katzenfutter", "Hundemutter"),]:
         print(f"\n=== {src} -> {tgt} ===")
         build_and_run(src, tgt)
 
-    # Rotation demonstrieren
-    Add, Delete, Swap, Move = define_pipeline_steps()
-    print("\nRotation von 'Katze':")
-    s = "Katze"
-    for _ in range(3):
-        s = Move().process(s)
-        print(s)
+
