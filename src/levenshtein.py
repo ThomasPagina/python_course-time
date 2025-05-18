@@ -95,38 +95,46 @@ def build_and_run(source: str, target: str):
     current = source
     steps = []
     for action, arg, idx in ops:
-        L = len(current)
+        # Allgemeine Vorrotation
         if action in ('substitute', 'delete'):
-            # Operation am idx: Rotate nach links, sodass idx am Ende liegt
+            L = len(current)
             t = (idx + 1) % L
             for _ in range(t):
                 steps.append(Move()); current = Move().process(current)
 
-            # Führe Operation aus
+            # Operation ausführen
             if action == 'substitute':
                 steps.append(Swap(arg)); current = Swap(arg).process(current)
-            else:  # 'delete'
+            else:  # delete
+                L_before = len(current)
                 steps.append(Delete()); current = Delete().process(current)
 
-            # Nach Delete ist Länge L-1
+            # Back-Rotation
+            L_new = len(current)
+            back = (L_new - t) % L_new if L_new > 0 else 0
+            for _ in range(back):
+                steps.append(Move()); current = Move().process(current)
+
         elif action == 'insert':
-            # Einfügeposition idx => idx = Position in target
-            # Rotieren idx Mal, so dass Position ans Ende kommt
             L = len(current)
-            t = (idx) % (L + 1)
+            t = idx % (L + 1)
             for _ in range(t):
                 steps.append(Move()); current = Move().process(current)
             steps.append(Add(arg)); current = Add(arg).process(current)
 
-    # Abschließende Korrektur: Finde k, sodass rotate_left(current, k) == target
+            # Back-Rotation nach Einfügung
+            L_new = len(current)
+            back = (L_new - t) % L_new
+            for _ in range(back):
+                steps.append(Move()); current = Move().process(current)
+
+    # Fallback: finale Korrekturrotation
     if current != target:
         L = len(current)
-        for k in range(1, L+1):
-            rot = current[k % L:] + current[:k % L]
-            if rot == target:
-                for _ in range(k):
-                    steps.append(Move())
-                current = target
+        for _ in range(L):
+            steps.append(Move())
+            current = Move().process(current)
+            if current == target:
                 break
 
     print("Pipeline-Schritte mit Rotation:", steps)
@@ -140,7 +148,7 @@ def build_and_run(source: str, target: str):
 
 if __name__ == "__main__":
     # Test-Fälle
-    for src, tgt in [("Haus", "Maus"), ("Haustier", "Mausstier"), ("Haustierl", "Mausstier")]:
+    for src, tgt in [("Haus", "Maus"), ("Haustier", "Mausstier"), ("Haustierl", "Mausstier"),("Katzenfutter","Hundemutter")]:
         print(f"\n=== {src} -> {tgt} ===")
         build_and_run(src, tgt)
 
