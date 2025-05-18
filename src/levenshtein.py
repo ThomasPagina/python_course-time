@@ -85,7 +85,7 @@ def levenshtein_path(source: str, target: str):
 
 # Demonstration
 if __name__ == "__main__":
-    source = "Haustier"
+    source = "Haustierl"
     target = "Mausstier"
 
     # Grundpfad ermitteln
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     steps = []
     for action, arg, idx in ops:
         if action == 'substitute':
-            # Substitute: bring char at idx to end, swap, then zurückrotieren
+            # Substitute: bring char at idx to end, swap, dann zurückrotieren
             t = (idx + 1) % len(current)
             for _ in range(t):
                 steps.append(Move()); current = Move().process(current)
@@ -108,7 +108,7 @@ if __name__ == "__main__":
                 steps.append(Move()); current = Move().process(current)
 
         elif action == 'delete':
-            # Delete: bring char at idx to end, delete, zurückrotieren
+            # Delete: bring char at idx to end, delete, dann zurückrotieren
             t = (idx + 1) % len(current)
             for _ in range(t):
                 steps.append(Move()); current = Move().process(current)
@@ -119,7 +119,7 @@ if __name__ == "__main__":
                 steps.append(Move()); current = Move().process(current)
 
         elif action == 'insert':
-            # Insert: bring Einfügeposition idx an Anfang, add, zurückrotieren
+            # Insert: bring Einfügeposition idx an Anfang, add, dann zurückrotieren
             t = idx % (len(current) + 1)
             for _ in range(t):
                 steps.append(Move()); current = Move().process(current)
@@ -127,13 +127,22 @@ if __name__ == "__main__":
             for _ in range(t):
                 steps.append(Move()); current = Move().process(current)
 
+    # Abschließende Korrektur-Rotation einfügen
+    # Rotiert current bis es target entspricht
+    if current != target:
+        L = len(current)
+        for _ in range(L):
+            if current == target:
+                break
+            steps.append(Move()); current = Move().process(current)
+
     print("Pipeline-Schritte mit Rotation:", steps)
 
     # Pipeline ausführen und prüfen
     pipeline = Pipeline(steps)
     result = pipeline.run_chained(source)
     assert result == target, f"Erwartet '{target}', erhalten '{result}'"
-    print("Transformation erfolgreich: ", result)
+    print("Transformation erfolgreich:", result)
 
     # Graph der Pipeline ausgeben
     graph = pipeline.visualize("levenshtein_pipeline", format='png')
