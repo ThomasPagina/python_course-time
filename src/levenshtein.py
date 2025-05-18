@@ -1,20 +1,15 @@
 import pipeline9
 from pipeline9 import PipelineStep, Pipeline
 
-# Helfer-Funktion, um Move-Schritte mehrfach anzuwenden
-
 def apply_moves(count: int, Move, steps: list, current: str) -> str:
-    """Fügt count Mal einen Move-Schritt hinzu und rotiert current entsprechend."""
     for _ in range(count):
         step = Move()
         steps.append(step)
         current = step.process(current)
     return current
 
-# Neue Pipeline-Schritte definieren
 def define_pipeline_steps():
     class Add(PipelineStep):
-        """Fügt am Ende einen Buchstaben hinzu"""
         def __init__(self, letter: str):
             self.letter = letter
         def process(self, s: str) -> str:
@@ -23,14 +18,12 @@ def define_pipeline_steps():
             return f"Add({self.letter})"
 
     class Delete(PipelineStep):
-        """Löscht den letzten Buchstaben"""
         def process(self, s: str) -> str:
             return s[:-1] if s else s
         def __repr__(self) -> str:
             return "Delete()"
 
     class Swap(PipelineStep):
-        """Ersetzt den letzten Buchstaben durch einen neuen"""
         def __init__(self, letter: str):
             self.letter = letter
         def process(self, s: str) -> str:
@@ -39,7 +32,6 @@ def define_pipeline_steps():
             return f"Swap({self.letter})"
 
     class Move(PipelineStep):
-        """Rotiert den String um eine Position nach links"""
         def process(self, s: str) -> str:
             return (s[1:] + s[0]) if s else s
         def __repr__(self) -> str:
@@ -47,7 +39,6 @@ def define_pipeline_steps():
 
     return Add, Delete, Swap, Move
 
-# Funktion zur Berechnung der Levenshtein-Distanz und Pfad (ohne Move)
 def levenshtein_path(source: str, target: str):
     m, n = len(source), len(target)
     dp = [[0] * (n + 1) for _ in range(m + 1)]
@@ -94,7 +85,6 @@ def levenshtein_path(source: str, target: str):
     ops.reverse()
     return dp[m][n], ops
 
-# Demo: Baue Pipeline mit Rotation und teste
 def build_and_run(source: str, target: str):
     Add, Delete, Swap, Move = define_pipeline_steps()
     distance, ops = levenshtein_path(source, target)
@@ -105,23 +95,15 @@ def build_and_run(source: str, target: str):
     steps = []
     for action, arg, idx in ops:
         if action in ('substitute', 'delete'):
-            # Vorrotation zum Ende der Zielposition
             t = (idx + 1) % len(current)
             current = apply_moves(t, Move, steps, current)
-
-            # Operation ausführen
             if action == 'substitute':
                 current = apply_swap_operation(Swap, current, steps, arg)
             else:
                 current = apply_delete_operation(Delete, current, steps)
-
-            # Rückrotation
             current = apply_reverse_moves(Move, current, steps, t)
-
         elif action == 'insert':
             current = insert_and_rotate(Add, Move, current, steps, arg, idx)
-
-    # Fallback finale Rotation
     if current != target:
         for _ in range(len(current)):
             current = apply_moves(1, Move, steps, current)
@@ -163,12 +145,9 @@ def apply_reverse_moves(Move, current, steps, t):
     return current
 
 if __name__ == "__main__":
-    # Test-Fälle
     for src, tgt in [("Haus", "Maus"),
                      ("Haustier", "Mausstier"),
                      ("Haustierl", "Mausstier"),
                      ("Katzenfutter", "Hundemutter"),]:
         print(f"\n=== {src} -> {tgt} ===")
         build_and_run(src, tgt)
-
-
