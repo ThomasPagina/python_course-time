@@ -110,11 +110,11 @@ def build_and_run(source: str, target: str):
             if current == target:
                 break
 
-    print("Pipeline-Schritte mit Rotation:", steps)
+    print("Pipeline steps with rotation:", steps)
     pipeline = Pipeline(steps)
     result = pipeline.run_chained(source)
-    assert result == target, f"Erwartet '{target}', erhalten '{result}'"
-    print("Transformation erfolgreich:", result)
+    assert result == target, f"Expected '{target}', got '{result}'"
+    print("Transformation successful:", result)
     graph = pipeline.visualize("levenshtein_pipeline", format='png')
     graph.view()
 
