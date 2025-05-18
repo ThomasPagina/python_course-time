@@ -54,7 +54,9 @@ def levenshtein_path(source: str, target: str):
             del_cost = dp[i-1][j] + 1
             ins_cost = dp[i][j-1] + 1
             dp[i][j] = sub_cost
-            op_choice = ('match', None) if cost == 0 else ('substitute', target[j-1])
+            op_choice = ('match', None)
+            if cost != 0:
+                op_choice = ('substitute', target[j-1])
             if del_cost < dp[i][j]:
                 dp[i][j] = del_cost
                 op_choice = ('delete', None)
@@ -68,25 +70,23 @@ def levenshtein_path(source: str, target: str):
     while i > 0 or j > 0:
         action, arg = op[i][j]
         if action == 'match':
-            i -= 1; j -= 1
-        elif action == 'substitute':
+            i -= 1; j -= 1; continue
+        if action == 'substitute':
             ops.append(('substitute', arg, i-1))
             i -= 1; j -= 1
         elif action == 'delete':
-            ops.append(('delete', None, None))
+            ops.append(('delete', None, i-1))
             i -= 1
         elif action == 'insert':
-            ops.append(('insert', arg, None))
+            ops.append(('insert', arg, j-1))
             j -= 1
     ops.reverse()
-
-    # Nur Grundoperationen
     return dp[m][n], ops
 
 # Demonstration
 if __name__ == "__main__":
     source = "Haustier"
-    target = "Hausstier"
+    target = "Mausstier"
 
     # Grundpfad ermitteln
     distance, ops = levenshtein_path(source, target)
@@ -97,23 +97,35 @@ if __name__ == "__main__":
     current = source
     steps = []
     for action, arg, idx in ops:
-        if action == 'match':
-            continue
         if action == 'substitute':
-            # Bring char idx ans Ende
-            rotations = (idx + 1) % len(current)
-            for _ in range(rotations):
+            # Substitute: bring char at idx to end, swap, then zurückrotieren
+            t = (idx + 1) % len(current)
+            for _ in range(t):
                 steps.append(Move()); current = Move().process(current)
-            # Ersetzen
             steps.append(Swap(arg)); current = Swap(arg).process(current)
-            # Zurückrotieren
-            back = len(current) - rotations
+            back = (len(current) - t) % len(current)
             for _ in range(back):
                 steps.append(Move()); current = Move().process(current)
+
         elif action == 'delete':
+            # Delete: bring char at idx to end, delete, zurückrotieren
+            t = (idx + 1) % len(current)
+            for _ in range(t):
+                steps.append(Move()); current = Move().process(current)
             steps.append(Delete()); current = Delete().process(current)
+            L = len(current)
+            back = (L + 1 - t) % L if L > 0 else 0
+            for _ in range(back):
+                steps.append(Move()); current = Move().process(current)
+
         elif action == 'insert':
+            # Insert: bring Einfügeposition idx an Anfang, add, zurückrotieren
+            t = idx % (len(current) + 1)
+            for _ in range(t):
+                steps.append(Move()); current = Move().process(current)
             steps.append(Add(arg)); current = Add(arg).process(current)
+            for _ in range(t):
+                steps.append(Move()); current = Move().process(current)
 
     print("Pipeline-Schritte mit Rotation:", steps)
 
