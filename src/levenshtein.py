@@ -85,8 +85,8 @@ def levenshtein_path(source: str, target: str):
 
 # Demonstration
 if __name__ == "__main__":
-    source = "Haus"
-    target = "Maus"
+    source = "Haustier"
+    target = "Hausstier"
 
     # Grundpfad ermitteln
     distance, ops = levenshtein_path(source, target)
