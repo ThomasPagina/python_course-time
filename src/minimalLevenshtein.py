@@ -19,20 +19,35 @@ def levenshtein_words(s1, s2):
 
     return dp[-1][-1]
 
-def total_distance(order):
-    return sum(levenshtein_words(order[i], order[i+1]) for i in range(len(order)-1))
+def build_distance_cache(sentences):
+    cache = {}
+    for i, s1 in enumerate(sentences):
+        for j, s2 in enumerate(sentences):
+            if i < j:
+                dist = levenshtein_words(s1, s2)
+                cache[(i, j)] = dist
+                cache[(j, i)] = dist  # symmetrisch
+            elif i == j:
+                cache[(i, j)] = 0
+    return cache
+
+def total_distance(order_indices, cache):
+    return sum(cache[(order_indices[i], order_indices[i+1])] for i in range(len(order_indices) - 1))
 
 def find_best_order(sentences):
+    n = len(sentences)
+    cache = build_distance_cache(sentences)
+
     best_order = None
     min_distance = float('inf')
 
-    for perm in itertools.permutations(sentences):
-        dist = total_distance(perm)
+    for perm in itertools.permutations(range(n)):
+        dist = total_distance(perm, cache)
         if dist < min_distance:
             min_distance = dist
             best_order = perm
 
-    return best_order, min_distance
+    return [sentences[i] for i in best_order], min_distance
 
 # Beispiel-Sätze (in zufälliger Reihenfolge):
 sentences = [
