@@ -2,23 +2,23 @@
 """
 infer_version_order.py
 
-Ermittelt eine wahrscheinliche Reihenfolge mehrerer
-Dateisnapshots desselben Quell­codes nur anhand des Text­inhalts.
+Determines a probable order of multiple
+file snapshots of the same source code based only on the text content.
 
-Nutzung:
-    python infer_version_order.py [pfad_zum_ordner]
+Usage:
+    python infer_version_order.py [path_to_folder]
 
-Idee
+Idea
 -----
-1. Jede Datei als String einlesen
-2. Für jedes Paar die Ähnlichkeit   sim = SequenceMatcher(...).ratio()
-   -> Distanz  d = 1 - sim
-3. Den Snapshot mit der *geringsten* durchschnittlichen Ähnlichkeit
-   zu allen anderen als wahrscheinlich ältesten wählen.
-4. Greedy-Pfad: Immer die noch nicht besuchte Datei mit
-   der *größten* Ähnlichkeit (kleinster d) an die aktuelle anhängen.
-Das entspricht grob einer Approximation des „kürzesten Pfads“
-durch alle Versionen (TSP-Heuristik).
+1. Read each file as a string
+2. For each pair, compute similarity   sim = SequenceMatcher(...).ratio()
+   -> Distance  d = 1 - sim
+3. Select the snapshot with the *lowest* average similarity
+   to all others as the likely oldest.
+4. Greedy path: Always append the not-yet-visited file with
+   the *highest* similarity (smallest d) to the current one.
+This roughly corresponds to an approximation of the "shortest path"
+through all versions (TSP heuristic).
 """
 import sys, glob, difflib, itertools, statistics, pathlib
 
@@ -53,9 +53,9 @@ def main(folder="./data"):
     sim = pairwise_similarity(files, texts)
     order, avg = greedy_order(files, sim)
 
-    print("⮕ Vermutete Reihenfolge (alt → neu):")
+    print("⮕ probable order (old → new):")
     for i, f in enumerate(order, 1):
-        print(f"  {i:02} {f.name}   ⌀-Ähnlichkeit {avg[f]:.3f}")
+        print(f"  {i:02} {f.name}   ⌀-similarity {avg[f]:.3f}")
 
 
 if __name__ == "__main__":
